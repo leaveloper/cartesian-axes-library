@@ -27,7 +27,7 @@ const axes = new Axes("canvas-container", {
 });
 
 // Establecer el número de marcas de graduación en los ejes
-axes.setTickMarks(5);
+axes.setTickMarks(8);
 
 // Dibujar algunos puntos en las coordenadas especificadas
 axes.draw(1, 2, "blue");
