@@ -16,7 +16,15 @@
 import Axes from "./axes.js";
 
 // Crear una instancia de Axes
-const axes = new Axes("canvas-container");
+const axes = new Axes("canvas-container", {
+  width: 900,                   // Ancho del lienzo
+  height: 900,                  // Alto del lienzo
+  padding: 10,                  // Espaciado entre los bordes del lienzo y los ejes
+  lineWidth: 2,                 // Grosor de las líneas de los ejes
+  dotSize: 10,                  // Tamaño de los puntos dibujados
+  axisColor: "gray",            // Color de los ejes
+  backgroundColor: "lightgray"  // Color de fondo del lienzo
+});
 
 // Establecer el número de marcas de graduación en los ejes
 axes.setTickMarks(5);
