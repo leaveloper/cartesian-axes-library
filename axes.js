@@ -3,8 +3,11 @@ export default class Axes {
   #ctx;
 
   #tickMarks;
+
   #gridX = [];
   #gridY = [];
+
+  #enableGuideLines;
 
   constructor(
     containerId,
@@ -13,6 +16,7 @@ export default class Axes {
       height = 900,
       padding = 10,
       lineWidth = 2,
+      enableGuideLines = false,
       dotSize = 10,
       axisColor = "gray",
       backgroundColor = "lightgray",
@@ -36,6 +40,7 @@ export default class Axes {
       height,
       padding,
       lineWidth,
+      enableGuideLines,
       axisColor,
       dotSize,
     };
@@ -299,7 +304,7 @@ export default class Axes {
     return currentCoordPixel + diffPixel * decimalDiff;
   }
 
-  draw(x, y, color = "red") {
+  draw(x, y, color) {
     const truncatedX = Math.trunc(x);
     const truncatedY = Math.trunc(y);
 
@@ -307,13 +312,18 @@ export default class Axes {
     if (this.checkIfCoordIsValid(x, y, truncatedX, truncatedY)) {
       console.log("(" + x + ", " + y + ") no es una coordenada válida");
     } else {
-      this.#ctx.beginPath();
-
       // Get the pixel coordinates for the given x and y
       const finalX = this.#getCoord(x, truncatedX, this.#gridX);
       const finalY = this.#getCoord(y, truncatedY, this.#gridY);
 
-      this.#ctx.fillStyle = color;
+      if (this.#canvasProps.enableGuideLines) {
+        // Guide lines are drawn before so that they are behind the points/dots.
+        this.drawGuideLine(finalX, finalY, color);
+      }
+
+      this.#ctx.beginPath();
+
+      this.#ctx.fillStyle = color ?? "black";
 
       this.#ctx.rect(
         finalX,
@@ -325,6 +335,37 @@ export default class Axes {
 
       this.#ctx.closePath();
     }
+  }
+
+  drawGuideLine(x, y, color) {
+    this.#ctx.beginPath();
+
+    const halfCanvasDimensions = this.#getCanvasHalfDimensions();
+    const halfDotSize = this.#canvasProps.dotSize / 2;
+
+    this.#ctx.setLineDash([1, 1]);
+
+    this.#ctx.strokeStyle = color ?? "black";
+
+    // The guide line is drawn from the axis to the middle position of the dot.
+
+    // X
+    if (halfCanvasDimensions.width !== y + halfDotSize) {
+      // Guide line is drawn only if the point is not at y = 0
+      this.#ctx.moveTo(halfCanvasDimensions.width, y + halfDotSize);
+      this.#ctx.lineTo(x + halfDotSize, y + halfDotSize);
+    }
+
+    // Y
+    if (halfCanvasDimensions.height !== x + halfDotSize) {
+      // Guide line is drawn only if the point is not at x = 0
+      this.#ctx.moveTo(x + halfDotSize, halfCanvasDimensions.height);
+      this.#ctx.lineTo(x + halfDotSize, y + halfDotSize);
+    }
+
+    this.#ctx.stroke();
+
+    this.#ctx.closePath();
   }
 
   checkIfCoordIsValid(x, y, truncatedX, truncatedY) {
