@@ -7,8 +7,6 @@ export default class Axes {
   #gridX = [];
   #gridY = [];
 
-  #enableGuideLines;
-
   constructor(
     containerId,
     {
@@ -207,6 +205,10 @@ export default class Axes {
     const dotSizeLineWidthOffset =
       (this.#canvasProps.dotSize - this.#canvasProps.lineWidth) / 2;
 
+    const fontSize = 16;
+    this.#ctx.font = `${fontSize}px Courier`;
+    this.#ctx.textBaseline = "middle";
+
     // X
     let point = halfCanvasDimensions.width - halfLineWidthRounded;
     this.#gridX[0] = point - dotSizeLineWidthOffset;
@@ -218,11 +220,13 @@ export default class Axes {
       // Assign the pixel position of the tick mark in the positive direction to the gridX array
       this.#gridX[i] = positiveX - dotSizeLineWidthOffset;
 
-      this.#ctx.rect(
+      this.drawTickMark(positiveX, tickMarkCenterY);
+
+      this.writeNumber(
+        i,
         positiveX,
-        tickMarkCenterY,
-        this.#canvasProps.lineWidth,
-        this.#canvasProps.dotSize
+        tickMarkCenterY + dotSizeLineWidthOffset,
+        fontSize
       );
 
       // Calculate the X position for the tick in the negative direction (to the left)
@@ -231,11 +235,13 @@ export default class Axes {
       // Assign the pixel position of the tick mark in the negative direction to the gridX array
       this.#gridX[-i] = negativeX - dotSizeLineWidthOffset;
 
-      this.#ctx.rect(
+      this.drawTickMark(negativeX, tickMarkCenterY);
+
+      this.writeNumber(
+        -i,
         negativeX,
-        tickMarkCenterY,
-        this.#canvasProps.lineWidth,
-        this.#canvasProps.dotSize
+        tickMarkCenterY + dotSizeLineWidthOffset,
+        fontSize
       );
     }
 
@@ -244,24 +250,30 @@ export default class Axes {
     this.#gridY[0] = point - dotSizeLineWidthOffset;
 
     for (let i = 1; i <= this.#tickMarks; i++) {
-      const positiveY = point + tickSpacingY * i;
-      this.#gridY[-i] = positiveY - dotSizeLineWidthOffset;
+      const positiveY = point - tickSpacingY * i;
+      this.#gridY[i] = positiveY - dotSizeLineWidthOffset;
 
-      this.#ctx.rect(
-        tickMarkCenterX,
+      this.drawTickMark(tickMarkCenterX, positiveY, false);
+
+      this.writeNumber(
+        i,
+        tickMarkCenterX - dotSizeLineWidthOffset,
         positiveY,
-        this.#canvasProps.dotSize,
-        this.#canvasProps.lineWidth
+        fontSize,
+        false
       );
 
-      const negativeY = point - tickSpacingY * i;
-      this.#gridY[i] = negativeY - dotSizeLineWidthOffset;
+      const negativeY = point + tickSpacingY * i;
+      this.#gridY[-i] = negativeY - dotSizeLineWidthOffset;
 
-      this.#ctx.rect(
-        tickMarkCenterX,
+      this.drawTickMark(tickMarkCenterX, negativeY, false);
+
+      this.writeNumber(
+        -i,
+        tickMarkCenterX - dotSizeLineWidthOffset,
         negativeY,
-        this.#canvasProps.dotSize,
-        this.#canvasProps.lineWidth
+        fontSize,
+        false
       );
     }
 
@@ -269,6 +281,40 @@ export default class Axes {
     this.#ctx.closePath();
 
     this.#drawAxisArrows();
+  }
+
+  drawTickMark(x, y, horizontal = true) {
+    const tickMarkDimensions = this.getTickMarkDimensions(horizontal);
+
+    this.#ctx.rect(x, y, tickMarkDimensions.width, tickMarkDimensions.height);
+  }
+
+  writeNumber(i, referenceX, referenceY, fontSize, horizontal = true) {
+    const tickMarkDimensions = this.getTickMarkDimensions(horizontal);
+
+    const textMetrics = this.#ctx.measureText(i);
+    // referenceX + (referenceWidth - textMetrics.width) / 2
+    const textX =
+      referenceX + (tickMarkDimensions.width - textMetrics.width) / 2;
+
+    // referenceY + referenceHeight / 2
+    const textY = referenceY + tickMarkDimensions.height / 2;
+
+    this.#ctx.fillText(
+      i,
+      textX - (horizontal ? 0 : fontSize),
+      textY + (horizontal ? fontSize : 0)
+    );
+  }
+
+  getTickMarkDimensions(horizontal) {
+    // Use an array to map the values based on orientation
+    const dimensions = [this.#canvasProps.lineWidth, this.#canvasProps.dotSize];
+
+    return {
+      width: dimensions[+!horizontal], // '0' if horizontal, '1' if not
+      height: dimensions[+horizontal], // '1' if horizontal, '0' if not
+    };
   }
 
   #drawDot() {
