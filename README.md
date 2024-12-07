@@ -21,7 +21,7 @@ const axes = new Axes("canvas-container", {
   height: 900,                  // Alto del lienzo
   padding: 10,                  // Espaciado entre los bordes del lienzo y los ejes
   lineWidth: 2,                 // Grosor de las líneas de los ejes
-  enableGuideLines: false       // Activa las líneas guías que conectan los puntos con los ejes
+  enableGuideLines: false,      // Activa las líneas guías que conectan los puntos con los ejes
   dotSize: 10,                  // Tamaño de los puntos dibujados
   axisColor: "gray",            // Color de los ejes
   backgroundColor: "lightgray"  // Color de fondo del lienzo
