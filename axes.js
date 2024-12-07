@@ -317,7 +317,7 @@ export default class Axes {
       const finalY = this.#getCoord(y, truncatedY, this.#gridY);
 
       if (this.#canvasProps.enableGuideLines) {
-        // Guide lines are drawn before so that they are behind the points/dots.
+        // Guide lines are drawn first to ensure they appear behind the points/dots
         this.drawGuideLine(finalX, finalY, color);
       }
 
@@ -347,18 +347,18 @@ export default class Axes {
 
     this.#ctx.strokeStyle = color ?? "black";
 
-    // The guide line is drawn from the axis to the middle position of the dot.
+    // Each guide line extends from the axis to the center of the point/dot
 
     // X
     if (halfCanvasDimensions.width !== y + halfDotSize) {
-      // Guide line is drawn only if the point is not at y = 0
+      // A guide line for the X-axis is drawn only if the point is not located at y = 0
       this.#ctx.moveTo(halfCanvasDimensions.width, y + halfDotSize);
       this.#ctx.lineTo(x + halfDotSize, y + halfDotSize);
     }
 
     // Y
     if (halfCanvasDimensions.height !== x + halfDotSize) {
-      // Guide line is drawn only if the point is not at x = 0
+      // A guide line for the Y-axis is drawn only if the point is not located at x = 0
       this.#ctx.moveTo(x + halfDotSize, halfCanvasDimensions.height);
       this.#ctx.lineTo(x + halfDotSize, y + halfDotSize);
     }
